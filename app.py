@@ -39,12 +39,74 @@ def callback():
     return 'OK'
 
 
+# # 處理訊息
+# @handler.add(MessageEvent, message=TextMessage)
+# def handle_message(event):
+#     msg = event.message.text
+#     reply_message = TextSendMessage(text="You said: " + msg)
+#     line_bot_api.reply_message(event.reply_token, reply_message)
+
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text
-    reply_message = TextSendMessage(text="You said: " + msg)
-    line_bot_api.reply_message(event.reply_token, reply_message)
+    if '最新合作廠商' in msg:
+        message = imagemap_message()
+        line_bot_api.reply_message(event.reply_token, message)
+    elif '最新活動訊息' in msg:
+        message = buttons_message()
+        line_bot_api.reply_message(event.reply_token, message)
+    elif '註冊會員' in msg:
+        message = Confirm_Template()
+        line_bot_api.reply_message(event.reply_token, message)
+    elif '旋轉木馬' in msg:
+        message = Carousel_Template()
+        line_bot_api.reply_message(event.reply_token, message)
+    elif '圖片畫廊' in msg:
+        message = test()
+        line_bot_api.reply_message(event.reply_token, message)
+    elif '功能列表' in msg:
+        message = function_list()
+        line_bot_api.reply_message(event.reply_token, message)
+
+    #======MongoDB操作範例======
+
+    elif '@讀取' in msg:
+        datas = read_many_datas()
+        datas_len = len(datas)
+        message = TextSendMessage(text=f'資料數量，一共{datas_len}條')
+        line_bot_api.reply_message(event.reply_token, message)
+
+    elif '@查詢' in msg:
+        datas = col_find('events')
+        message = TextSendMessage(text=str(datas))
+        line_bot_api.reply_message(event.reply_token, message)
+
+    elif '@對話紀錄' in msg:
+        datas = read_chat_records()
+        print(type(datas))
+        n = 0
+        text_list = []
+        for data in datas:
+            if '@' in data:
+                continue
+            else:
+                text_list.append(data)
+            n+=1
+        data_text = '\n'.join(text_list)
+        message = TextSendMessage(text=data_text[:5000])
+        line_bot_api.reply_message(event.reply_token, message)
+
+    elif '@刪除' in msg:
+        text = delete_all_data()
+        message = TextSendMessage(text=text)
+        line_bot_api.reply_message(event.reply_token, message)
+
+    #======MongoDB操作範例======
+
+    else:
+        message = TextSendMessage(text=msg)
+        line_bot_api.reply_message(event.reply_token, message)
 
 # 處理 Postback 事件
 @handler.add(PostbackEvent)
