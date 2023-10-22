@@ -29,34 +29,31 @@ handler = WebhookHandler(os.getenv('e9ec4cc1141ece77dd6173d82037195c'))
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
 def callback():
-    # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
-    # get request body as text
     body = request.get_data(as_text=True)
-    write_one_data(eval(body.replace('false','False')))
     app.logger.info("Request body: " + body)
-    # handle webhook body
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
     return 'OK'
 
+
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text
+    reply_message = TextSendMessage(text="You said: " + msg)
+    line_bot_api.reply_message(event.reply_token, reply_message)
 
-@handler.add(PostbackEvent)
-def handle_message(event):
-    print(event.postback.data)
-    
+# 處理 Postback 事件
 @handler.add(PostbackEvent)
 def handle_postback(event):
-    postback_data = event.postback.data  # 取得 postback 資料
+    postback_data = event.postback.data
     reply_message = TextSendMessage("You selected: " + postback_data)
-    line_bot_api.reply_message(event.reply_token, TextMessage(text=reply_message))
-    print("您按了:"+postback_data)
+    line_bot_api.reply_message(event.reply_token, reply_message)
+    print("您按了:" + postback_data)
+
 
 @handler.add(MemberJoinedEvent)
 def welcome(event):
