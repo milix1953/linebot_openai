@@ -50,10 +50,11 @@ def handle_message(event):
 @handler.add(PostbackEvent)
 def handle_message(event):
     print(event.postback.data)
+    
 @handler.add(PostbackEvent)
 def handle_postback(event):
     postback_data = event.postback.data  # 取得 postback 資料
-    reply_message = "You selected: " + postback_data
+    reply_message = TextSendMessage("You selected: " + postback_data)
     line_bot_api.reply_message(event.reply_token, TextMessage(text=reply_message))
 
 @handler.add(MemberJoinedEvent)
