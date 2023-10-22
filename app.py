@@ -56,6 +56,7 @@ def handle_postback(event):
     postback_data = event.postback.data  # 取得 postback 資料
     reply_message = TextSendMessage("You selected: " + postback_data)
     line_bot_api.reply_message(event.reply_token, TextMessage(text=reply_message))
+    print("您按了:"+postback_data)
 
 @handler.add(MemberJoinedEvent)
 def welcome(event):
